@@ -23,7 +23,7 @@ go.sum: go.mod
 	go get
 
 image.tar.gz:
-	$(DOCKER) save $(IMAGE) | gzip > image.tar.gz
+	$(DOCKER) save $(IMAGE) | pigz > image.tar.gz
 
 $(OUTPUT):
 	mkdir $(OUTPUT)
