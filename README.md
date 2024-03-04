@@ -4,11 +4,12 @@ This tool can be used to convert a Docker image to an executable that you can se
 
 ## Installation
 
-Download a binary from the [releases page](https://github.com/rzane/docker2exe/releases).
+Minimal dependencies are:
 
-    $ mv docker2exe-darwin-amd64 docker2exe
-    $ chmod +x docker2exe
-    $ ./docker2exe --help
+- A working go environment with version >=1.18
+- [pigz](https://zlib.net/pigz/)
+
+To compile, just run `make` and executables for each platform will be generated in `dist/` folder.
 
 ## Usage
 
