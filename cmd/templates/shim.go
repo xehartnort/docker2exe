@@ -5,16 +5,17 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"syscall"
 
-	"github.com/mattn/go-isatty"
+	"golang.org/x/term"
 )
 
 type Shim struct {
+	RunName string
 	Image   string
 	Workdir string
 	Env     []string
 	Volumes []string
+	Ports   []string
 	Stdout  io.Writer
 	Stderr  io.Writer
 }
@@ -27,11 +28,14 @@ func (shim *Shim) Exists() bool {
 }
 
 func (shim *Shim) Pull() error {
-	return shim.docker("pull", shim.Image).Run()
+	cmd := shim.docker("pull", shim.Image)
+	cmd.Stdout = os.Stdout // make this output visible
+	return cmd.Run()
 }
 
 func (shim *Shim) Load(file io.Reader) error {
-	cmd := shim.docker("docker", "load")
+	cmd := shim.docker("load")
+	cmd.Stdout = os.Stdout // make this output visible
 
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -57,19 +61,20 @@ func (shim *Shim) Load(file io.Reader) error {
 }
 
 func (shim *Shim) Exec(containerArgs []string) error {
-	cmd := shim.docker()
-	if cmd.Err != nil {
-		return cmd.Err
-	}
 
-	args, err := shim.assembleRunArgs()
+	args, err := shim.assembleRunArgs() // aquí es donde tengo que hacer la modificación
 	if err != nil {
 		return err
 	}
 
-	args = append([]string{cmd.Path}, args...)
+	// args = append([]string{cmd.Path}, args...)
 	args = append(args, containerArgs...)
-	return syscall.Exec(cmd.Path, args, os.Environ())
+
+	cmd := shim.docker(args...)
+	cmd.Stdout = os.Stdout // make this output visible
+	cmd.Stdout = os.Stderr // make this output visible
+
+	return cmd.Run()
 }
 
 func (shim *Shim) docker(arg ...string) *exec.Cmd {
@@ -87,8 +92,10 @@ func (shim *Shim) docker(arg ...string) *exec.Cmd {
 func (shim *Shim) assembleRunArgs() ([]string, error) {
 	args := []string{"run", "--rm"}
 
-	if isatty.IsTerminal(os.Stdout.Fd()) {
-		args = append(args, "-it")
+	args = append(args, "--name", shim.RunName)
+
+	if term.IsTerminal(int(os.Stdout.Fd())) {
+		args = append(args, "-t")
 	}
 
 	for _, env := range shim.Env {
@@ -97,6 +104,10 @@ func (shim *Shim) assembleRunArgs() ([]string, error) {
 
 	for _, volume := range shim.Volumes {
 		args = append(args, "-v", volume)
+	}
+
+	for _, bind_port := range shim.Ports {
+		args = append(args, "-p", bind_port)
 	}
 
 	if shim.Workdir != "" {

@@ -15,6 +15,7 @@ var templates = template.Must(template.ParseFS(templateRoot, "*/*"))
 
 type Generator struct {
 	Name    string
+	RunName string
 	Output  string
 	Targets []string
 	Module  string
@@ -23,6 +24,7 @@ type Generator struct {
 	Workdir string
 	Env     []string
 	Volumes []string
+	Ports   []string
 }
 
 func (gen *Generator) Run() error {
@@ -49,7 +51,7 @@ func (gen *Generator) copyTemplates(dest string) error {
 		}
 		defer file.Close()
 
-		err = template.Execute(file, gen)
+		err = template.Execute(file, gen) // aplica datos en gen a plantilla
 		if err != nil {
 			return err
 		}

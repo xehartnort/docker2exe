@@ -6,8 +6,9 @@ import (
 	"os/user"
 	"path"
 
-	"github.com/rzane/docker2exe/cmd"
-	"github.com/urfave/cli/v2"
+	"xehartnort/docker2exe/cmd" // reference to local package
+
+	"github.com/urfave/cli/v2" // imports as package "cli"
 )
 
 func main() {
@@ -25,6 +26,10 @@ func main() {
 				Required: true,
 				Name:     "image",
 				Usage:    "name of your docker image",
+			},
+			&cli.StringFlag{
+				Name:  "runname",
+				Usage: "Name of the docker container when it is running",
 			},
 			&cli.BoolFlag{
 				Name:  "embed",
@@ -44,6 +49,11 @@ func main() {
 				Name:    "volume",
 				Aliases: []string{"v"},
 				Usage:   "bind mount a volume",
+			},
+			&cli.StringSliceFlag{
+				Name:    "port",
+				Aliases: []string{"p"},
+				Usage:   "bind a port",
 			},
 			&cli.StringFlag{
 				Name:  "output",
@@ -70,6 +80,7 @@ func main() {
 func generate(c *cli.Context) error {
 	generator := cmd.Generator{
 		Output:  c.String("output"),
+		RunName: c.String("runname"),
 		Name:    c.String("name"),
 		Targets: c.StringSlice("target"),
 		Module:  c.String("module"),
@@ -78,6 +89,11 @@ func generate(c *cli.Context) error {
 		Workdir: c.String("workdir"),
 		Env:     c.StringSlice("env"),
 		Volumes: c.StringSlice("volume"),
+		Ports:   c.StringSlice("port"),
+	}
+
+	if generator.RunName == "" {
+		generator.RunName = "00webapp00"
 	}
 
 	if generator.Output == "" {

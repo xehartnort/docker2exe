@@ -1,6 +1,6 @@
 NAME = docker2exe
 OUTPUT = dist
-VERSION = v0.2.1
+VERSION = v0.3.0
 SOURCES = $(wildcard *.go)
 TARGETS = darwin/amd64 darwin/arm64 linux/amd64 windows/amd64
 
@@ -15,7 +15,7 @@ all: $(TARGETS)
 
 .PHONY: clean
 clean:
-	$(RM) -rf dist
+	$(RM) -rf $(OUTPUT)
 
 .PHONY: test
 test: all
@@ -23,10 +23,6 @@ test: all
 	dist/test-$(OS)-$(ARCH) echo OK
 	dist/docker2exe-$(OS)-$(ARCH) --name test-embed --image alpine --embed
 	dist/test-embed-$(OS)-$(ARCH) echo OK
-
-.PHONY: release
-release: clean all
-	gh release create $(VERSION) dist/docker2exe-* --generate-notes
 
 $(OUTPUT):
 	mkdir $(OUTPUT)

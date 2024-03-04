@@ -16,10 +16,12 @@ var embedded embed.FS
 
 func main() {
 	shim := Shim{
+		RunName: "{{.RunName}}",
 		Image: "{{.Image}}",
 		Workdir: "{{.Workdir}}",
 		Env: {{printf "%#v" .Env}},
 		Volumes: {{printf "%#v" .Volumes}},
+		Ports: {{printf "%#v" .Ports}},
 		Stdout: ioutil.Discard,
 		Stderr: os.Stderr,
 	}
