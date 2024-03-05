@@ -6,6 +6,7 @@ This tool can be used to convert a Docker image to an executable that you can se
 
 Minimal dependencies are:
 
+- A linux-based OS such as ubuntu, compiling is not supported on Windows and untested in Mac OS
 - A working go environment with version >=1.18
 - [pigz](https://zlib.net/pigz/)
 
